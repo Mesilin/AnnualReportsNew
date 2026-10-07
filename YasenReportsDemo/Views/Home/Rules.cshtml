@@ -1,0 +1,23 @@
+@model List<YasenReportsDemo.Models.ValidationRule>
+@{
+    Layout = "_Layout";
+}
+<h1>Правила валидации (из БД)</h1>
+<p>Правила хранятся в таблице <code>ValidationRules</code>: человекочитаемое описание + выражение NCalc.
+Переменные <code>[c1]..[cn]</code> — колонки строки текущей формы; <code>[SUM_x]</code> — сумма по колонке текущей формы;
+<code>[form-key.SUM_x]</code> — агрегат другой формы за тот же год/регион (межформенный контроль).</p>
+
+<table class="grid">
+    <tr><th>Форма</th><th>Описание</th><th>Expression</th><th>Scope</th><th>Severity</th><th>С года</th></tr>
+    @foreach (var r in Model)
+    {
+        <tr>
+            <td>@r.FormKey</td>
+            <td>@r.Description</td>
+            <td><code>@r.Expression</code></td>
+            <td>@r.Scope</td>
+            <td>@r.Severity</td>
+            <td>@r.EffectiveFromYear</td>
+        </tr>
+    }
+</table>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YasenReports Demo — конфигурные отчёты авиалесоохраны</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+<header>
+    <a asp-controller="Home" asp-action="Index">🌲 YasenReports Demo</a>
+    <nav>
+        <a asp-controller="Home" asp-action="Index">Отчёты</a>
+        <a asp-controller="Home" asp-action="Configs" target="_blank">JSON-конфиги форм</a>
+        <a asp-controller="Home" asp-action="Rules">Правила валидации</a>
+    </nav>
+</header>
+<main>
+    @if (TempData["Msg"] is string msg)
+    {
+        <div class="alert">@msg</div>
+    }
+    @RenderBody()
+</main>
+<footer>Demo: конфигурация форм и правил валидации в PostgreSQL (JSON), генерация форм «текущий год», чтение snapshot «прошлые годы».</footer>
+</body>
+</html>
