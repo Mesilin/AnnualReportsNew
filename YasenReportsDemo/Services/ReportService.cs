@@ -64,7 +64,7 @@ public class ReportService
     public async Task<ReportViewModel> GetOrCreateAsync(string formKey, int year, int regionId, bool recalcComputed)
     {
         var inst = await _db.ReportInstances
-            .Include(r => r.Rows).ThenInclude(x => x.ReportInstance)
+            .Include(r => r.Rows)//.ThenInclude(x => x.ReportInstance)
             .Include(r => r.ConfigVersion)
             .FirstOrDefaultAsync(r => r.FormKey == formKey && r.Year == year && r.RegionId == regionId);
 
