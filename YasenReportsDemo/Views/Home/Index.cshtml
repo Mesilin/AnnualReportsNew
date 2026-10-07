@@ -1,0 +1,75 @@
+@{
+    Layout = "_Layout";
+}
+<h1>Генератор годовых отчётов авиалесоохраны (демо)</h1>
+<p>Механизм: конфигурация формы — JSON в PostgreSQL; строки таблицы берутся из справочников
+(субъекты / авиаотделения / лесничества); часть колонок считается по SQL из конфига, часть вводится вручную.
+Текущий (@ViewBag.CurrentYear) год — можно генерировать и редактировать; прошлые годы — только чтение сохранённых снимков.</p>
+
+<div class="card">
+    <h2>Сформировать / открыть отчёт</h2>
+    <form id="openForm" onsubmit="return openReport(event)">
+        <label>Форма:
+            <select id="formKey">
+                @{
+                    var seen = new HashSet<string>();
+                    foreach (YasenReportsDemo.Models.FormConfigVersion f in ViewBag.Forms)
+                    {
+                        if (seen.Add(f.FormKey))
+                        {
+                            var cfg = YasenReportsDemo.Services.FormConfigService.Parse(f.ConfigJson);
+                            <option value="@f.FormKey">@cfg.FormNumber — @cfg.Title</option>
+                        }
+                    }
+                }
+            </select>
+        </label>
+        <label>Регион:
+            <select id="regionId">
+                @foreach (YasenReportsDemo.Models.Region r in ViewBag.Regions)
+                {
+                    <option value="@r.Id">@r.Name</option>
+                }
+            </select>
+        </label>
+        <label>Год:
+            <select id="year">
+                @for (int y = 2024; y <= ViewBag.CurrentYear + 1; y++)
+                {
+                    <option value="@y" selected="@(y == ViewBag.CurrentYear)">@y @(y == ViewBag.CurrentYear ? "(текущий)" : "")</option>
+                }
+            </select>
+        </label>
+        <button type="submit">Открыть</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Версии конфигураций форм в БД</h2>
+    <table class="grid">
+        <tr><th>FormKey</th><th>Версия</th><th>Действует с года</th><th>Название</th></tr>
+        @foreach (YasenReportsDemo.Models.FormConfigVersion f in ViewBag.Forms)
+        {
+            var cfg = YasenReportsDemo.Services.FormConfigService.Parse(f.ConfigJson);
+            <tr>
+                <td>@f.FormKey</td>
+                <td>@f.Version</td>
+                <td>@f.EffectiveFromYear</td>
+                <td>@cfg.FormNumber — @cfg.Title <br /><small>@cfg.Columns.Count колонок</small></td>
+            </tr>
+        }
+    </table>
+    <p><em>Видно, что «form-1-avia» имеет редакцию 2 для 2026 г.: изменились заголовки и добавлена графа «земли обороны».
+    Отчёт за 2026 откроется по v2, за 2024/2025 — по v1.</em></p>
+</div>
+
+<script>
+    function openReport(e) {
+        e.preventDefault();
+        const fk = document.getElementById('formKey').value;
+        const rg = document.getElementById('regionId').value;
+        const yr = document.getElementById('year').value;
+        location.href = `/Report/Open?formKey=${encodeURIComponent(fk)}&year=${yr}&regionId=${rg}`;
+        return false;
+    }
+</script>

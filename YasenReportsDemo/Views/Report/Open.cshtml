@@ -1,0 +1,149 @@
+@model YasenReportsDemo.Services.ReportViewModel
+@{
+    Layout = "_Layout";
+    var cfg = Model.Config;
+}
+<h1>Форма @cfg.FormNumber — @cfg.Title</h1>
+<p>
+    Год отчёта: <b>@Model.Instance.Year</b>, регион: <b>@Model.Instance.Region?.Name</b>,
+    статус: <b>@(Model.Instance.Status == "approved" ? "утверждён (данные заморожены)" : "черновик")</b>,
+    конфигурация: v@(cfg.Version) (ред. с @Model.Instance.ConfigVersion!.EffectiveFromYear г.)
+</p>
+
+@if (!Model.IsEditable)
+{
+    <div class="alert warn">Режим «только чтение»: данные за прошлые годы или утверждённые отчёты отдаются из сохранённых снимков, пересчёт по SQL-источникам не выполняется.</div>
+}
+
+@foreach (var w in Model.SqlWarnings)
+{
+    <div class="alert warn">@w</div>
+}
+
+<table class="grid report-table">
+    <thead>
+    <tr>
+        <th rowspan="2">№ п/п</th>
+        <th rowspan="2">Наименование (@(cfg.RowSource == "forestry" ? "лесничество" : "авиаотделение / ЛПС"))</th>
+        @foreach (var col in cfg.Columns)
+        {
+            <th title="@col.Header">гр. @(col.Grafa)<br />@col.Header
+                <br /><small>
+                    @if (col.Kind == YasenReportsDemo.Models.ColumnKind.Manual) { <span class="tag manual">ручной ввод</span> }
+                    else if (col.Kind == YasenReportsDemo.Models.ColumnKind.Computed) { <span class="tag computed">из данных осн. приложения (SQL)</span> }
+                    else if (col.Kind == YasenReportsDemo.Models.ColumnKind.Dict) { <span class="tag dict">справочник</span> }
+                </small>
+            </th>
+        }
+        @if (Model.IsEditable) { <th rowspan="2"></th> }
+    </tr>
+    </thead>
+    <tbody>
+    @{ int n = 0; }
+    @foreach (var row in Model.Rows)
+    {
+        n++;
+        <tr data-rowkey="@row.Key">
+            <td>@n</td>
+            <td class="rowlabel">@row.Label</td>
+            @foreach (var col in cfg.Columns)
+            {
+                var val = row.Values.GetValueOrDefault(col.Key);
+                <td class="cell-@col.Kind.ToString().ToLower()">
+                    @if (Model.IsEditable && (col.Kind == YasenReportsDemo.Models.ColumnKind.Manual || col.Kind == YasenReportsDemo.Models.ColumnKind.Dict))
+                    {
+                        <input type="number" step="any" data-col="@col.Key"
+                               value="@(val?.ToString(System.Globalization.CultureInfo.InvariantCulture))"
+                               placeholder="@(col.Required ? "обяз." : "")" />
+                    }
+                    else
+                    {
+                        <span>@val</span>
+                        @if (col.Kind == YasenReportsDemo.Models.ColumnKind.Computed)
+                        {
+                            <small class="srcnote">@(Model.IsEditable ? "(пересчитано)" : "(снимок)")</small>
+                        }
+                    }
+                </td>
+            }
+            @if (Model.IsEditable)
+            {
+                <td><button class="save-row" data-rowkey="@row.Key">Сохранить строку</button></td>
+            }
+        </tr>
+        if (row.ColumnErrors.Count > 0)
+        {
+            <tr class="errrow"><td colspan="@(cfg.Columns.Count + 3)">⛔ @string.Join(" | ", row.ColumnErrors)</td></tr>
+        }
+    }
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="2"><b>Итого</b></td>
+        @foreach (var col in cfg.Columns)
+        {
+            <td><b>@(col.Total == "sum" ? (object?)Model.Totals.GetValueOrDefault(col.Key) ?? "" : "")</b></td>
+        }
+        @if (Model.IsEditable) { <td></td> }
+    </tr>
+    </tfoot>
+</table>
+
+<h2>Применимые правила валидации</h2>
+<ul class="rules">
+    @foreach (var r in Model.Rules)
+    {
+        <li>@r.Description <code>@r.Expression</code> <em>(@r.Scope)</em></li>
+    }
+</ul>
+
+@if (Model.Errors.Count > 0)
+{
+    <div class="card">
+        <h2>Замечания межформенного контроля</h2>
+        @foreach (var e in Model.Errors)
+        {
+            <div class="@(e.Severity == "error" ? "alert err" : "alert warn")">
+                @(e.Severity == "error" ? "⛔" : "⚠️") @e.Message &nbsp;<small>(@e.RuleDescription)</small>
+            </div>
+        }
+    </div>
+}
+
+@if (Model.Instance.Status == "draft" && Model.Instance.Year == DateTime.UtcNow.Year)
+{
+    <form method="post" asp-controller="Report" asp-action="Finalize" onsubmit="return confirm('Утвердить отчёт? Данные будут заморожены.');">
+        <input type="hidden" name="reportId" value="@Model.Instance.Id" />
+        <button type="submit" class="primary">✔ Утвердить и заморозить отчёт</button>
+    </form>
+}
+
+<div id="toast" class="toast"></div>
+
+<script>
+    const REPORT_ID = @Model.Instance.Id;
+    document.querySelectorAll('.save-row').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const tr = btn.closest('tr');
+            const rowKey = tr.dataset.rowkey;
+            const values = {};
+            tr.querySelectorAll('input[data-col]').forEach(inp => {
+                values[inp.dataset.col] = inp.value === '' ? null : parseFloat(inp.value.replace(',', '.'));
+            });
+            const body = new URLSearchParams();
+            body.append('reportId', REPORT_ID);
+            body.append('rowKey', rowKey);
+            for (const [k, v] of Object.entries(values)) body.append(`values[${k}]`, v ?? '');
+            const resp = await fetch('/Report/SaveRow', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+            const res = await resp.json();
+            toast(res.ok ? '✅ Строка сохранена и проверена' : '❌ Ошибки валидации', res.ok ? 'ok' : 'bad');
+            if (res.errors && res.errors.length) setTimeout(() => location.reload(), 900);
+            else setTimeout(() => location.reload(), 600);
+        });
+    });
+    function toast(msg, cls) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.className = 'toast show ' + cls;
+        setTimeout(() => t.className = 'toast', 2500);
+    }
+</script>
