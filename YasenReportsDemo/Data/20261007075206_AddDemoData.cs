@@ -23,7 +23,7 @@ namespace YasenReportsDemo.Data
   "columns": [
     { "key": "c1", "header": "Общая площадь земель лесного фонда, тыс. га (по приказу о лесопожарном зонировании)", "grafa": "1",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(f.\\\"AreaThsHa\\\"), 0) FROM \\\"Forestries\\\" f WHERE f.\\\"RegionId\\\" = @regionId" },
+      "sqlSource": "SELECT COALESCE(SUM(f.\"AreaThsHa\"), 0) FROM \"Forestries\" f WHERE f.\"RegionId\" = @regionId" },
 
     { "key": "c2", "header": "Обслуживаемая по госзаданиям, договорам площадь лесов, тыс. га", "grafa": "2",
       "kind": "Manual", "dataType": "decimal", "required": true, "minValue": 0, "maxValue": 999999, "decimals": 1, "total": "sum" },
@@ -46,7 +46,7 @@ namespace YasenReportsDemo.Data
     { "key": "c8", "header": "Площадь лесов ООПТ (заповедники, нацпарки, заказники), тыс. га", "grafa": "8",
       "kind": "Dict", "dataType": "decimal", "decimals": 1, "total": "sum",
       "hint": "Справочник ООПТ (в демо — подстрока SQL к справочнику лесничеств)",
-      "dictSql": "SELECT 'value' AS key, COALESCE(SUM(f.\\\"AreaThsHa\\\" * 0.05), 0) AS value FROM \\\"Forestries\\\" f WHERE f.\\\"RegionId\\\" = @regionId" }
+      "dictSql": "SELECT 'value' AS key, COALESCE(SUM(f.\"AreaThsHa\" * 0.05), 0) AS value FROM \"Forestries\" f WHERE f.\"RegionId\" = @regionId" }
   ]
 }
 """;
@@ -62,7 +62,7 @@ namespace YasenReportsDemo.Data
   "columns": [
     { "key": "c1", "header": "Общая площадь лесного фонда, тыс. га", "grafa": "1",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(f.\\\"AreaThsHa\\\"), 0) FROM \\\"Forestries\\\" f WHERE f.\\\"RegionId\\\" = @regionId" },
+      "sqlSource": "SELECT COALESCE(SUM(f.\"AreaThsHa\"), 0) FROM \"Forestries\" f WHERE f.\"RegionId\" = @regionId" },
 
     { "key": "c2", "header": "Площадь лесов по госзаданию, тыс. га", "grafa": "2",
       "kind": "Manual", "dataType": "decimal", "required": true, "minValue": 0, "maxValue": 999999, "decimals": 1, "total": "sum" },
@@ -88,7 +88,7 @@ namespace YasenReportsDemo.Data
 
     { "key": "c8", "header": "Площадь лесов ООПТ, тыс. га", "grafa": "9",
       "kind": "Dict", "dataType": "decimal", "decimals": 1, "total": "sum",
-      "dictSql": "SELECT 'value' AS key, COALESCE(SUM(f.\\\"AreaThsHa\\\" * 0.05), 0) AS value FROM \\\"Forestries\\\" f WHERE f.\\\"RegionId\\\" = @regionId" }
+      "dictSql": "SELECT 'value' AS key, COALESCE(SUM(f.\"AreaThsHa\" * 0.05), 0) AS value FROM \"Forestries\" f WHERE f.\"RegionId\" = @regionId" }
   ]
 }
 """;
@@ -103,23 +103,23 @@ namespace YasenReportsDemo.Data
   "columns": [
     { "key": "h1", "header": "Кол-во дней с полётами, всего", "grafa": "1",
       "kind": "Computed", "dataType": "int", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\\\"DaysWithFlights\\\"), 0) FROM \\\"FlightHours\\\" fh WHERE fh.\\\"AirDivisionId\\\" = @rowKey AND fh.\\\"Year\\\" = @year" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"DaysWithFlights\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year" },
 
     { "key": "h2", "header": "Налёт по охране лесов от пожаров, всего, часов", "grafa": "2",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\\\"Hours\\\"), 0) FROM \\\"FlightHours\\\" fh WHERE fh.\\\"AirDivisionId\\\" = @rowKey AND fh.\\\"Year\\\" = @year AND fh.\\\"WorkType\\\" = 'firePatrol' AND fh.\\\"SubType\\\" = 'total'" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"WorkType\" = 'firePatrol' AND fh.\"SubType\" = 'total'" },
 
     { "key": "h3", "header": "в т.ч. патрулирование с обнаружением пожаров, часов", "grafa": "3",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\\\"Hours\\\"), 0) FROM \\\"FlightHours\\\" fh WHERE fh.\\\"AirDivisionId\\\" = @rowKey AND fh.\\\"Year\\\" = @year AND fh.\\\"SubType\\\" = 'patrolDetected'" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"SubType\" = 'patrolDetected'" },
 
     { "key": "h4", "header": "в т.ч. осмотр действующих пожаров, часов", "grafa": "4",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\\\"Hours\\\"), 0) FROM \\\"FlightHours\\\" fh WHERE fh.\\\"AirDivisionId\\\" = @rowKey AND fh.\\\"Year\\\" = @year AND fh.\\\"SubType\\\" = 'inspection'" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"SubType\" = 'inspection'" },
 
     { "key": "h5", "header": "Прочие производственные полёты, часов", "grafa": "5",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\\\"Hours\\\"), 0) FROM \\\"FlightHours\\\" fh WHERE fh.\\\"AirDivisionId\\\" = @rowKey AND fh.\\\"Year\\\" = @year AND fh.\\\"WorkType\\\" = 'other'" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"WorkType\" = 'other'" },
 
     { "key": "h6", "header": "Тренировочные полёты, часов", "grafa": "6",
       "kind": "Manual", "dataType": "decimal", "required": true, "minValue": 0, "decimals": 1, "total": "sum" },
@@ -140,22 +140,22 @@ namespace YasenReportsDemo.Data
   "columns": [
     { "key": "f1", "header": "Количество пожаров, шт.", "grafa": "1",
       "kind": "Computed", "dataType": "int", "total": "sum",
-      "sqlSource": "SELECT COUNT(*) FROM \\\"Fires\\\" fr WHERE fr.\\\"ForestryId\\\" = @rowKey AND EXTRACT(YEAR FROM fr.\\\"StartDate\\\") = @year" },
+      "sqlSource": "SELECT COUNT(*) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year" },
 
     { "key": "f2", "header": "Площадь, покрытая огнём, га", "grafa": "2",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fr.\\\"AreaHa\\\"), 0) FROM \\\"Fires\\\" fr WHERE fr.\\\"ForestryId\\\" = @rowKey AND EXTRACT(YEAR FROM fr.\\\"StartDate\\\") = @year" },
+      "sqlSource": "SELECT COALESCE(SUM(fr.\"AreaHa\"), 0) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year" },
 
     { "key": "f3", "header": "Площадь погибшего леса, га", "grafa": "3",
       "kind": "Manual", "dataType": "decimal", "required": true, "minValue": 0, "decimals": 1, "total": "sum" },
 
     { "key": "f4", "header": "Количество пожаров, обнаруженных авиацией, шт.", "grafa": "4",
       "kind": "Computed", "dataType": "int", "total": "sum",
-      "sqlSource": "SELECT COUNT(*) FROM \\\"Fires\\\" fr WHERE fr.\\\"ForestryId\\\" = @rowKey AND fr.\\\"DetectedBy\\\" = 'авиа' AND EXTRACT(YEAR FROM fr.\\\"StartDate\\\") = @year" },
+      "sqlSource": "SELECT COUNT(*) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND fr.\"DetectedBy\" = 'авиа' AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year" },
 
     { "key": "f5", "header": "В том числе ликвидировано силами авиаподразделений, шт.", "grafa": "5",
       "kind": "Computed", "dataType": "int", "total": "sum",
-      "sqlSource": "SELECT COUNT(*) FROM \\\"Fires\\\" fr WHERE fr.\\\"ForestryId\\\" = @rowKey AND fr.\\\"ExtinguishedBy\\\" = 'авиа' AND EXTRACT(YEAR FROM fr.\\\"StartDate\\\") = @year" }
+      "sqlSource": "SELECT COUNT(*) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND fr.\"ExtinguishedBy\" = 'авиа' AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year" }
   ]
 }
 """;
