@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\uip\sources\uip\Core\UIP.Core.Model\UIP.Core.Model.csproj" />
+    <ProjectReference Include="..\..\..\shared\uip\sources\uip\Database\UIP.Database.EfCore\UIP.Database.csproj" />
+  </ItemGroup>
+
+</Project>
