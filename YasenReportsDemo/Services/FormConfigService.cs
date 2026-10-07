@@ -1,5 +1,6 @@
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using YasenReportsDemo.Data;
 using YasenReportsDemo.Models;
 
@@ -15,7 +16,8 @@ public class FormConfigService
     {
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true
+        AllowTrailingCommas = true,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public static FormConfig Parse(string json) =>
