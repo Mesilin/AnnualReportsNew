@@ -39,6 +39,14 @@ public class ColumnConfig
     /// <summary>Для Kind=Computed: SQL-запрос со плейсхолдерами @regionId,@year,@rowKey, возвращающее одно скалярное значение</summary>
     public string? SqlSource { get; set; }
 
+    /// <summary>
+    /// Для Kind=Computed: PostgreSQL-тип параметра @rowKey, если он участвует в запросе.
+    /// "int" — сравнение с целочисленным внешним ключом (напр. FlightHours.AirDivisionId),
+    /// "text"/null — сравнение со строковым полем. Без указания Npgsql передаст rowKey как text
+    /// и PostgreSQL упадёт с 42883 («оператор не существует: integer = text»).
+    /// </summary>
+    public string? RowKeyType { get; set; }
+
     /// <summary>Для Kind=Formula: выражение NCalc по другим колонкам строки, напр. "([c3] + [c4] + [c5]) == [c1]" — только для display-проверок на клиенте не используем, это про вычисляемые суммы ячеек: напр. "[c1] - [c2]".</summary>
     public string? Expression { get; set; }
 

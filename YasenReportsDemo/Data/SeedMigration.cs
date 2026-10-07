@@ -102,23 +102,28 @@ public partial class SeedInitialData : Migration
   "columns": [
     { "key": "h1", "header": "Кол-во дней с полётами, всего", "grafa": "1",
       "kind": "Computed", "dataType": "int", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\"DaysWithFlights\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"DaysWithFlights\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year",
+      \"rowKeyType\": \"int\" },
 
     { "key": "h2", "header": "Налёт по охране лесов от пожаров, всего, часов", "grafa": "2",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"WorkType\" = 'firePatrol' AND fh.\"SubType\" = 'total'" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"WorkType\" = 'firePatrol' AND fh.\"SubType\" = 'total'",
+      \"rowKeyType\": \"int\" },
 
     { "key": "h3", "header": "в т.ч. патрулирование с обнаружением пожаров, часов", "grafa": "3",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"SubType\" = 'patrolDetected'" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"SubType\" = 'patrolDetected'",
+      \"rowKeyType\": \"int\" },
 
     { "key": "h4", "header": "в т.ч. осмотр действующих пожаров, часов", "grafa": "4",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"SubType\" = 'inspection'" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"SubType\" = 'inspection'",
+      \"rowKeyType\": \"int\" },
 
     { "key": "h5", "header": "Прочие производственные полёты, часов", "grafa": "5",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"WorkType\" = 'other'" },
+      "sqlSource": "SELECT COALESCE(SUM(fh.\"Hours\"), 0) FROM \"FlightHours\" fh WHERE fh.\"AirDivisionId\" = @rowKey AND fh.\"Year\" = @year AND fh.\"WorkType\" = 'other'",
+      \"rowKeyType\": \"int\" },
 
     { "key": "h6", "header": "Тренировочные полёты, часов", "grafa": "6",
       "kind": "Manual", "dataType": "decimal", "required": true, "minValue": 0, "decimals": 1, "total": "sum" },
@@ -139,22 +144,26 @@ public partial class SeedInitialData : Migration
   "columns": [
     { "key": "f1", "header": "Количество пожаров, шт.", "grafa": "1",
       "kind": "Computed", "dataType": "int", "total": "sum",
-      "sqlSource": "SELECT COUNT(*) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year" },
+      "sqlSource": "SELECT COUNT(*) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year",
+      \"rowKeyType\": \"int\" },
 
     { "key": "f2", "header": "Площадь, покрытая огнём, га", "grafa": "2",
       "kind": "Computed", "dataType": "decimal", "total": "sum",
-      "sqlSource": "SELECT COALESCE(SUM(fr.\"AreaHa\"), 0) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year" },
+      "sqlSource": "SELECT COALESCE(SUM(fr.\"AreaHa\"), 0) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year",
+      \"rowKeyType\": \"int\" },
 
     { "key": "f3", "header": "Площадь погибшего леса, га", "grafa": "3",
       "kind": "Manual", "dataType": "decimal", "required": true, "minValue": 0, "decimals": 1, "total": "sum" },
 
     { "key": "f4", "header": "Количество пожаров, обнаруженных авиацией, шт.", "grafa": "4",
       "kind": "Computed", "dataType": "int", "total": "sum",
-      "sqlSource": "SELECT COUNT(*) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND fr.\"DetectedBy\" = 'авиа' AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year" },
+      "sqlSource": "SELECT COUNT(*) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND fr.\"DetectedBy\" = 'авиа' AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year",
+      \"rowKeyType\": \"int\" },
 
     { "key": "f5", "header": "В том числе ликвидировано силами авиаподразделений, шт.", "grafa": "5",
       "kind": "Computed", "dataType": "int", "total": "sum",
-      "sqlSource": "SELECT COUNT(*) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND fr.\"ExtinguishedBy\" = 'авиа' AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year" }
+      "sqlSource": "SELECT COUNT(*) FROM \"Fires\" fr WHERE fr.\"ForestryId\" = @rowKey AND fr.\"ExtinguishedBy\" = 'авиа' AND EXTRACT(YEAR FROM fr.\"StartDate\") = @year"",
+      \"rowKeyType\": \"int\"}
   ]
 }
 """;

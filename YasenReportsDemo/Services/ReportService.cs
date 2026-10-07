@@ -125,7 +125,7 @@ public class ReportService
                         {
                             try
                             {
-                                values[col.Key] = await _sql.ExecuteScalarAsync(col.SqlSource, regionId, year, key);
+                                values[col.Key] = await _sql.ExecuteScalarAsync(col.SqlSource, regionId, year, key, col.RowKeyType);
                             }
                             catch (SqlSourceException ex)
                             {
@@ -195,7 +195,7 @@ public class ReportService
         var snap = new Dictionary<string, double?>();
         foreach (var col in cfg.Columns.Where(c => c.Kind is ColumnKind.Computed or ColumnKind.Formula && !string.IsNullOrWhiteSpace(c.SqlSource)))
         {
-            try { snap[col.Key] = await _sql.ExecuteScalarAsync(col.SqlSource!, inst.RegionId, inst.Year, rowKey); }
+            try { snap[col.Key] = await _sql.ExecuteScalarAsync(col.SqlSource!, inst.RegionId, inst.Year, rowKey, col.RowKeyType); }
             catch (SqlSourceException) { snap[col.Key] = ParseJson(row.ComputedSnapshotJson).GetValueOrDefault(col.Key); }
         }
         // dict-колонки: если пользователь не ввёл — берём из справочника
