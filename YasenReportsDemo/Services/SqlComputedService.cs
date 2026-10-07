@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using YasenReportsDemo.Data;
 using YasenReportsDemo.Models;
@@ -15,7 +16,7 @@ public class SqlComputedService
     private readonly AppDbContext _db;
     public SqlComputedService(AppDbContext db) => _db = db;
 
-    public async Task<double?> ExecuteScalarAsync(string sql, int regionId, int year, string? rowKey)
+    public async Task<double?> ExecuteScalarAsync(string sql, int regionId, int year, string? rowKey, string? rowKeyType = null)
     {
         try
         {
@@ -25,7 +26,7 @@ public class SqlComputedService
             cmd.CommandText = sql;
             cmd.Parameters.Add(P(cmd, "@regionId", regionId));
             cmd.Parameters.Add(P(cmd, "@year", year));
-            cmd.Parameters.Add(P(cmd, "@rowKey", rowKey is null ? DBNull.Value : (object)rowKey));
+            cmd.Parameters.Add(PRowKey(cmd, rowKey, rowKeyType));
             var res = await cmd.ExecuteScalarAsync();
             if (res is null || res is DBNull) return null;
             return Convert.ToDouble(res);
@@ -69,6 +70,56 @@ public class SqlComputedService
         p.ParameterName = name;
         p.Value = value;
         return p;
+    }
+
+    /// <summary>
+    /// Параметр @rowKey с типом из конфига колонки (rowKeyType). По умолчанию строка (text),
+    /// но если SQL сравнивает rowKey с числовым столбцом (integer/bigint), нужно явно
+    /// передать числовое значение — иначе Npgsql отправит text и PostgreSQL не найдёт
+    /// оператор сравнения (SQLSTATE 42883: «оператор не существует: integer = text»).
+    /// </summary>
+    static DbParameter PRowKey(DbCommand cmd, string? rowKey, string? rowKeyType)
+    {
+        if (rowKey is null) return P(cmd, "@rowKey", DBNull.Value);
+
+        object value = NormalizeRowKey(rowKey, rowKeyType);
+        return P(cmd, "@rowKey", value);
+    }
+
+    static object NormalizeRowKey(string rowKey, string? rowKeyType)
+    {
+        var type = rowKeyType?.Trim().ToLowerInvariant();
+        switch (type)
+        {
+            // Integer-колонки (напр. FlightHours.AirDivisionId): отправляем int32,
+            // иначе Npgsql выведет bigint и PostgreSQL не найдёт оператор integer = bigint.
+            case "int":
+            case "integer":
+                return int.TryParse(rowKey, out var i) ? i : rowKey;
+            case "bigint":
+            case "long":
+                return long.TryParse(rowKey, out var l) ? l : rowKey;
+            // Decimal-колонки (напр. numeric/decimal в основном приложении): отправляем decimal,
+            // иначе Npgsql отправит text и PostgreSQL не найдёт оператор numeric = text (42883).
+            // Инвариантная культура: конфиг может содержать точку как десятичный разделитель.
+            case "decimal":
+            case "numeric":
+            case "money":
+                return decimal.TryParse(rowKey, NumberStyles.Number, CultureInfo.InvariantCulture, out var dec)
+                    ? dec
+                    : rowKey;
+            case "double":
+            case "float":
+            case "real":
+                return double.TryParse(rowKey, NumberStyles.Float, CultureInfo.InvariantCulture, out var dbl)
+                    ? dbl
+                    : rowKey;
+            case "uuid":
+                return Guid.TryParse(rowKey, out var g) ? g : rowKey;
+            default:
+                // text/varchar/null — строка, как раньше.
+                return rowKey;
+        }
     }
 }
 
